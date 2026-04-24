@@ -126,12 +126,25 @@ ACTIVE_CLIENTS_RE = re.compile(
 )
 
 def classify(line: str) -> str:
-    """Return CSS class for a log line."""
+    """
+    Return the CSS class for a log line.
+
+    Warns only on genuine loss (non-zero percentage), not on every stat line
+    that happens to contain the word "lost".
+    """
     l = line.lower()
-    if "error" in l:   return "log-error"
-    if "warn"  in l or "lost" in l: return "log-warn"
-    if "summary" in l or "started" in l or "done" in l: return "log-ok"
-    if "client" in l and "started" in l: return "log-accent"
+    if "error" in l:
+        return "log-error"
+    # Only flag as warning if "warn" appears, or if there is a non-zero loss value.
+    # Stat lines look like "Lost: 0.00%" — we should not warn those.
+    if "warn" in l:
+        return "log-warn"
+    if "lost:" in l and "lost: 0.00%" not in l and "lost: 0%" not in l:
+        return "log-warn"
+    if "summary" in l or "done" in l:
+        return "log-ok"
+    if "started" in l:
+        return "log-accent"
     return "log-info"
 
 def html_log_line(line: str) -> str:

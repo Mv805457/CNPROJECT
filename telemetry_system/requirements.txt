@@ -1,0 +1,6 @@
+cryptography
+matplotlib
+psutil
+pandas
+streamlit
+customtkinter
